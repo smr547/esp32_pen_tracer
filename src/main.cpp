@@ -2,11 +2,14 @@
 #include <SPI.h>
 
 // ---------------------- PIN DEFINITIONS ----------------------
+/*  PIN definitions are set in platformio.ini build_flags
+
 #define XPT_CS_PIN 21   // Chip Select for XPT2046
 #define XPT_IRQ_PIN 14  // PENIRQ pin (active LOW
-#define T_DIN 16
-#define T_DOUT 18
-#define T_SCLK 17
+#define T_DIN 16        // MOSI (Data in to XPT2046)
+#define T_DOUT 18       // MISO (Data out from XPT2046)
+#define T_SCLK 17       // SPI clock pin
+*/
 
 // ---------------------- XPT2046 COMMAND BYTES ----------------
 // 12-bit, differential, PD=00 (power down between conversions)
