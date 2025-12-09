@@ -44,6 +44,29 @@ void onPenMove(uint16_t x, uint16_t y, uint16_t z, uint16_t ic);
 void onPenUp();
 void reArmIRQ(void);
 
+// ---------------------- CLASSES -----------------------------
+class Pixel {
+   public:
+    void fromPenVoltages(int16_t vx, int16_t vy) {
+        x_ = scale(vx, X_MIN, X_MAX, SCREEN_WIDTH);
+        y_ = scale(vy, Y_MIN, Y_MAX, SCREEN_HEIGHT);
+    }
+
+    int16_t x() const { return x_; }
+    int16_t y() const { return y_; }
+
+   private:
+    int16_t x_{0};
+    int16_t y_{0};
+
+    static int16_t scale(int16_t v, int16_t vmin, int16_t vmax, int16_t size) {
+        int32_t r = (int32_t)(v - vmin) * size / (vmax - vmin);
+        if (r < 0) return 0;
+        if (r >= size) return size - 1;
+        return (int16_t)r;
+    }
+};
+
 // ---------------------- SETUP -------------------------------
 void setup() {
     Serial.begin(115200);
@@ -218,7 +241,10 @@ bool confirmPenUp() {
 // ---------------------- CALLBACKS ----------------------------
 // In a real app, you'd map raw X/Y to screen coordinates here
 void onPenDown(uint16_t x, uint16_t y, uint16_t z, uint16_t ic) {
-    Serial.printf("PEN DOWN:  X=%u  Y=%u  Z=%u  interrupts=%u\n", x, y, z, ic);
+    Pixel pixel;
+    pixel.fromPenVoltages(x, y);
+    Serial.printf("PEN DOWN:  X=%u  Y=%u  Z=%u  interrupts=%u x=%u  y=%u\n", x,
+                  y, z, ic, pixel.x(), pixel.y());
 }
 
 void reportRawValues(uint16_t x, uint16_t y, uint16_t z, uint16_t ic) {
@@ -230,8 +256,10 @@ void onPenMove(uint16_t x, uint16_t y, uint16_t z, uint16_t ic) {
     static uint16_t last_x = 0;
     static uint16_t last_y = 0;
     if (last_x != x or last_y != y) {
-        Serial.printf("MOVE:      X=%u  Y=%u  Z=%u  interrupts=%u\n", x, y, z,
-                      ic);
+        Pixel pixel;
+        pixel.fromPenVoltages(x, y);
+        Serial.printf("MOVE:      X=%u  Y=%u  Z=%u  interrupts=%u x=%u  y=%u\n",
+                      x, y, z, ic, pixel.x(), pixel.y());
         last_x = x;
         last_y = y;
     }
